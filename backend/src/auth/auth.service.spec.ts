@@ -3,24 +3,37 @@ import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { User } from '../users/entities/user.entity';
 import * as bcrypt from 'bcrypt';
+import { UserResponseDto } from 'src/users/dto/user-response.dto';
 
 describe('AuthService', () => {
   let service: AuthService;
 
-  const mockUser = {
+  const mockUser: User = {
     id: 1,
+    name: 'Admin',
     email: 'admin@example.com',
     password: bcrypt.hashSync('123456', 10),
+    role: 'admin',
+  } as User;
+
+  const mockLoginUser: UserResponseDto = {
+    id: 1,
+    name: 'Admin',
+    email: 'admin@example.com',
     role: 'admin',
   };
 
   const mockUsersService = {
-    findByEmail: jest
-      .fn()
-      .mockImplementation((email) =>
-        email === 'admin@example.com' ? Promise.resolve(mockUser) : null,
-      ),
+    findByEmail: jest.fn(),
+    create: jest.fn(),
+  };
+
+  const mockUsersRepository = {
+    findOne: jest.fn().mockResolvedValue(mockUser),
+    save: jest.fn().mockResolvedValue({ ...mockUser, lastLogin: new Date() }),
   };
 
   const mockJwtService = {
@@ -34,6 +47,7 @@ describe('AuthService', () => {
         AuthService,
         { provide: UsersService, useValue: mockUsersService },
         { provide: JwtService, useValue: mockJwtService },
+        { provide: getRepositoryToken(User), useValue: mockUsersRepository },
       ],
     }).compile();
 
@@ -43,16 +57,39 @@ describe('AuthService', () => {
   it('deve validar o usuário com credenciais corretas', async () => {
     const user = await service.validateUser('admin@example.com', '123456');
     expect(user.email).toBe('admin@example.com');
+    expect(mockUsersRepository.findOne).toHaveBeenCalledWith({
+      where: { email: 'admin@example.com' },
+    });
+    expect(mockUsersRepository.save).toHaveBeenCalled();
   });
 
   it('deve lançar exceção se credenciais forem inválidas', async () => {
+    const wrongPasswordUser = {
+      ...mockUser,
+      password: bcrypt.hashSync('outrasenha', 10),
+    };
+    mockUsersRepository.findOne.mockResolvedValueOnce(wrongPasswordUser);
+
     await expect(
-      service.validateUser('admin@example.com', 'wrongpass'),
-    ).rejects.toThrow();
+      service.validateUser('admin@example.com', 'senhaErrada'),
+    ).rejects.toThrow('Credencias inválidas');
   });
 
-  it('deve retornar um token no login', async () => {
-    const token = await service.login(mockUser);
+  it('deve lançar exceção se o usuário não for encontrado', async () => {
+    mockUsersRepository.findOne.mockResolvedValueOnce(null);
+
+    await expect(
+      service.validateUser('inexistente@example.com', '123456'),
+    ).rejects.toThrow('Credencias inválidas');
+  });
+
+  it('deve retornar um token no login', () => {
+    const token = service.login(mockLoginUser);
     expect(token.access_token).toBe('fake-jwt-token');
+    expect(mockJwtService.sign).toHaveBeenCalledWith({
+      email: mockLoginUser.email,
+      sub: mockLoginUser.id,
+      role: mockLoginUser.role,
+    });
   });
 });

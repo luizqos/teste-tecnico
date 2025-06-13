@@ -10,10 +10,14 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('login')
-  @ApiOperation({ summary: 'Login de usuário' })
-  @ApiResponse({ status: 200, description: 'Login realizado com sucesso' })
+  @ApiOperation({ summary: 'Autentica um usuário' })
+  @ApiResponse({ status: 200, description: 'Token JWT gerado' })
   async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+    const user = await this.authService.validateUser(
+      loginDto.email,
+      loginDto.password,
+    );
+    return this.authService.login(user);
   }
 
   @Post('register')
