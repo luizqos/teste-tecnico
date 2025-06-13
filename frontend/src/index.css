@@ -25,8 +25,11 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Ubuntu', 'Oxygen',
+    'Roboto', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   min-width: 320px;
   min-height: 100vh;
 }
