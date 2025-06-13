@@ -10,7 +10,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-    private configService: ConfigService, // <- Adicionado aqui
+    private configService: ConfigService,
   ) {}
 
   getJwtSecret() {
@@ -39,7 +39,7 @@ export class AuthService {
       email: dto.email,
       name: dto.name,
       password: hashedPassword,
-      role: 'user', // padrão
+      role: 'user',
     });
 
     return this.login(newUser);
