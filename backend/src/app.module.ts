@@ -14,12 +14,11 @@ import { RolesGuard } from './auth/roles.guard';
     },
   ],
   imports: [
-    // Carrega o .env automaticamente
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.env',
     }),
 
-    // Conecta com o banco SQLite, lendo config do .env (se quiser)
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
