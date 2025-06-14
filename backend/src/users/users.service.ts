@@ -61,7 +61,7 @@ export class UsersService {
     return UserResponseDto.fromEntity(rest as User);
   }
 
-  async update(id: number, dto: UpdateUserDto) {
+  async update(id: number, dto: CreateUserDto) {
     await this.repo.update(id, dto);
     return this.findById(id);
   }

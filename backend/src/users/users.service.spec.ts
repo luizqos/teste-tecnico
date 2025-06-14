@@ -62,7 +62,11 @@ describe('UsersService', () => {
   });
 
   it('deve retornar todos os usuários', async () => {
-    const result = await service.findAllUsers();
+    const result = await service.findAllUsers({
+      role: undefined,
+      sortBy: 'id',
+      order: 'asc',
+    });
     expect(result.length).toBe(2);
     expect(repo.find).toHaveBeenCalled();
   });

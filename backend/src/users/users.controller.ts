@@ -88,7 +88,7 @@ export class UsersController {
   async update(
     @Request() req: AuthenticatedRequest,
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateUserDto: UpdateUserDto,
+    @Body() updateUserDto: CreateUserDto,
   ) {
     if (req.user.id !== id && req.user.role !== 'admin') {
       throw new ForbiddenException('Você não pode atualizar outro usuário.');

@@ -20,4 +20,9 @@ export class UpdateUserDto {
   @IsOptional()
   @IsIn(['admin', 'user'])
   role?: 'admin' | 'user';
+
+  @ApiProperty({ example: 'status', enum: [0, 1] })
+  @IsOptional()
+  @IsIn([0, 1])
+  status?: 0 | 1;
 }

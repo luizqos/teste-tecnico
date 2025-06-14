@@ -1,5 +1,12 @@
-import { IsEmail, IsNotEmpty, MinLength, IsIn } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsEmail,
+  IsNotEmpty,
+  MinLength,
+  IsIn,
+  IsOptional,
+  IsBoolean,
+} from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateUserDto {
   @ApiProperty({ example: 'João Silva' })
@@ -19,4 +26,9 @@ export class CreateUserDto {
   @IsNotEmpty()
   @IsIn(['admin', 'user'])
   role: 'admin' | 'user';
+
+  @ApiPropertyOptional({ type: Boolean, example: true })
+  @IsOptional()
+  @IsBoolean()
+  status?: boolean;
 }
