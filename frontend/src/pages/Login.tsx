@@ -22,11 +22,9 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login(email, password);
-      alert('Login realizado com sucesso!');
+     await login(email, password);
     } catch (error) {
       console.error(error);
-      alert('Email ou senha inválidos.');
     }
   };
 
