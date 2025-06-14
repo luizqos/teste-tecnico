@@ -10,6 +10,7 @@ import {
   NotFoundException,
   ParseIntPipe,
   Delete,
+  Post,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -23,6 +24,7 @@ import {
 } from '@nestjs/swagger';
 
 import { AuthenticatedRequest } from 'src/auth/interfaces/authenticated-request.interface';
+import { CreateUserDto } from './dto/create-user.dto';
 @ApiTags('Usuários')
 @ApiBearerAuth()
 @Controller('users')
@@ -54,6 +56,20 @@ export class UsersController {
       throw new ForbiddenException('Acesso negado.');
     }
     return this.usersService.findAllUsers();
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Post()
+  @ApiOperation({ summary: 'Cadastra novo usuário' })
+  @ApiResponse({ status: 201, description: 'Usuário Cadastrado com sucesso' })
+  async register(
+    @Body() createUserDto: CreateUserDto,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    if (req.user.role !== 'admin') {
+      throw new ForbiddenException('Acesso negado.');
+    }
+    return this.usersService.createUser(createUserDto);
   }
 
   @UseGuards(JwtAuthGuard)
