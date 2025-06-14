@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/unbound-method */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -59,7 +62,7 @@ describe('UsersService', () => {
   });
 
   it('deve retornar todos os usuários', async () => {
-    const result = await service.findAll();
+    const result = await service.findAllUsers();
     expect(result.length).toBe(2);
     expect(repo.find).toHaveBeenCalled();
   });
@@ -78,6 +81,7 @@ describe('UsersService', () => {
       name: 'Admin',
       email: 'admin@example.com',
       password: 'password123',
+      role: 'admin',
     });
 
     const user = await service.findByEmail('admin@example.com');

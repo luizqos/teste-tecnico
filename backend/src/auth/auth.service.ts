@@ -58,7 +58,7 @@ export class AuthService {
       email: dto.email,
       name: dto.name,
       password: hashedPassword,
-      role: 'user',
+      role: dto.role,
     });
 
     return this.login(newUser);

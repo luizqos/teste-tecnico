@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/unbound-method */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
@@ -5,12 +7,21 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
+import { AuthenticatedRequest } from 'src/auth/interfaces/authenticated-request.interface';
+
+function mockRequest(user: {
+  id?: number;
+  role?: string;
+}): AuthenticatedRequest {
+  return {
+    user,
+  } as AuthenticatedRequest;
+}
 
 describe('UsersController', () => {
   let controller: UsersController;
   let service: UsersService;
 
-  // Mock básico do repositório
   const mockUserRepository = {
     findOne: jest.fn(),
     find: jest.fn(),
@@ -44,18 +55,16 @@ describe('UsersController', () => {
   });
 
   it('should return user profile', async () => {
-    // Mock completo do UserResponseDto que seu método deve retornar
     const mockUser = {
       id: 1,
       email: 'test@example.com',
       name: 'Test User',
-      role: 'user', // importante ter o role
+      role: 'user',
     };
 
-    // Mocka o método findById do service para retornar o mock completo
     jest.spyOn(service, 'findById').mockResolvedValue(mockUser as any);
 
-    const req = { user: { id: 1 } };
+    const req = mockRequest({ id: 1, role: 'admin' });
     const result = await controller.getProfile(req);
 
     expect(result).toEqual(mockUser);
@@ -63,26 +72,23 @@ describe('UsersController', () => {
   });
 
   it('should return all users if admin', async () => {
-    // Arrange
     const users = [
       { id: 1, email: 'admin@example.com', name: 'Admin User', role: 'admin' },
       { id: 2, email: 'user@example.com', name: 'Normal User', role: 'user' },
     ];
-    jest.spyOn(service, 'findAll').mockResolvedValue(users);
+    jest.spyOn(service, 'findAllUsers').mockResolvedValue(users);
 
-    // Act
-    const req = { user: { role: 'admin' } };
-    const result = await controller.findAll(req);
+    const req = mockRequest({ id: 1, role: 'admin' });
+    const result = await controller.findAllUsers(req);
 
-    // Assert
     expect(result).toEqual(users);
-    expect(service.findAll).toHaveBeenCalled();
+    expect(service.findAllUsers).toHaveBeenCalled();
   });
 
   it('should throw ForbiddenException if user is not admin', async () => {
-    const req = { user: { role: 'user' } };
-    await expect(controller.findAll(req)).rejects.toThrow(
-      'Acesso negado. Apenas administradores.',
+    const req = mockRequest({ id: 1, role: 'user' });
+    await expect(controller.findAllUsers(req)).rejects.toThrow(
+      'Acesso negado.',
     );
   });
 });

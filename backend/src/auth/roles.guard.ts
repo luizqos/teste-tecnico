@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   Injectable,
   CanActivate,
@@ -18,10 +21,12 @@ export class RolesGuard implements CanActivate {
     );
 
     if (!requiredRoles || requiredRoles.length === 0) {
-      return true; // Se não exigir nenhum papel, libera o acesso
+      return true;
     }
 
     const { user } = context.switchToHttp().getRequest();
+
+    console.log('.>>>', user);
 
     if (!requiredRoles.includes(user.role)) {
       throw new ForbiddenException('Acesso negado. Permissão insuficiente.');

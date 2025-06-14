@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { UserResponseDto } from './dto/user-response.dto';
 import * as bcrypt from 'bcrypt';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -11,11 +13,6 @@ export class UsersService {
     @InjectRepository(User)
     private readonly repo: Repository<User>,
   ) {}
-
-  async create(data: Partial<User>): Promise<User> {
-    const user = this.repo.create(data);
-    return this.repo.save(user);
-  }
 
   async createUser(data: {
     email: string;
@@ -37,14 +34,28 @@ export class UsersService {
     const user = await this.repo.findOne({ where: { email } });
     return user ?? undefined;
   }
-  async findAll(): Promise<UserResponseDto[]> {
+  async findAllUsers(): Promise<UserResponseDto[]> {
     const users = await this.repo.find();
-    return users.map(({ password, ...user }) => user);
+    return users.map(({ ...user }) => user);
   }
   async findById(id: number): Promise<UserResponseDto | undefined> {
     const user = await this.repo.findOne({ where: { id } });
     if (!user) return undefined;
-    const { password, ...rest } = user;
+    const { ...rest } = user;
     return UserResponseDto.fromEntity(rest as User);
+  }
+
+  async update(id: number, dto: UpdateUserDto) {
+    await this.repo.update(id, dto);
+    return this.findById(id);
+  }
+
+  async remove(id: number) {
+    return this.repo.delete(id);
+  }
+
+  async create(dto: CreateUserDto) {
+    const user = this.repo.create(dto);
+    return this.repo.save(user);
   }
 }
