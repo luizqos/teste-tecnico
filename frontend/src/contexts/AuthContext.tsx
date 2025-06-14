@@ -1,5 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useState, useContext, useEffect, type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from "jwt-decode";
 import api from '../services/api';
 
 interface User {
@@ -7,6 +9,15 @@ interface User {
   name: string;
   email: string;
   role: string;
+}
+
+interface JwtPayload {
+  sub: number;
+  email: string;
+  name: string;
+  role: string;
+  iat: number;
+  exp: number;
 }
 
 interface AuthContextData {
@@ -21,25 +32,58 @@ export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
+
     const token = localStorage.getItem('token');
-    if (storedUser && token) {
-      setUser(JSON.parse(storedUser));
+
+    if (token) {
+      const decoded = jwtDecode<JwtPayload>(token);
+      const currentUser: User = {
+        id: decoded.sub,
+        name: decoded.name,
+        email: decoded.email,
+        role: decoded.role,
+      };
+      setUser(currentUser);
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
   }, []);
 
   async function login(email: string, password: string) {
-    const { data } = await api.post('/auth/login', { email, password });
-    localStorage.setItem('token', data.access_token);
-    localStorage.setItem('user', JSON.stringify(data.user));
-    setUser(data.user);
+    try {
+      const { data } = await api.post('/auth/login', { email, password });
+
+      const token = data.access_token;
+      const decoded = jwtDecode<JwtPayload>(token);
+      const currentUser: User = {
+        id: decoded.sub,
+        name: decoded.name,
+        email: decoded.email,
+        role: decoded.role,
+      };
+      
+      localStorage.setItem('token', token);
+      setUser(currentUser);
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+      if (decoded.role === 'admin') {
+        navigate('/users');
+      } else {
+        navigate('/profile');
+      }
+    } catch (err) {
+      console.error('Erro no login', err);
+      alert('Email ou senha inválidos');
+    }
   }
 
   function logout() {
     localStorage.clear();
     setUser(null);
+    delete api.defaults.headers.common['Authorization'];
+    navigate('/login');
   }
 
   return (

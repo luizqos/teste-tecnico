@@ -88,6 +88,7 @@ describe('AuthService', () => {
     expect(token.access_token).toBe('fake-jwt-token');
     expect(mockJwtService.sign).toHaveBeenCalledWith({
       email: mockLoginUser.email,
+      name: mockLoginUser.name,
       sub: mockLoginUser.id,
       role: mockLoginUser.role,
     });

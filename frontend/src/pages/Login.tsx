@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import {
   Wrapper,
@@ -29,6 +29,10 @@ export default function Login() {
       alert('Email ou senha inválidos.');
     }
   };
+
+  useEffect(() => {
+    localStorage.clear();
+  }, []);
 
   return (
     <Wrapper>
