@@ -227,7 +227,7 @@ export default function Users() {
                     <Td>
                       {user.lastLogin
                         ? new Date(user.lastLogin).toLocaleDateString()
-                        : 'Nunca'}
+                        : '-'}
                     </Td>
                     <Td>
                       <ActionButton onClick={() => handleOpenEdit(user)}>
@@ -270,7 +270,7 @@ export default function Users() {
                   <strong>
                     {user.lastLogin
                       ? new Date(user.lastLogin).toLocaleDateString()
-                      : 'Nunca'}
+                      : '-'}
                   </strong>
                 </CardItem>
                 <CardActions>
