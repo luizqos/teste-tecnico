@@ -11,6 +11,7 @@ import {
   ParseIntPipe,
   Delete,
   Post,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -25,6 +26,8 @@ import {
 
 import { AuthenticatedRequest } from 'src/auth/interfaces/authenticated-request.interface';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UserResponseDto } from './dto/user-response.dto';
+import { FilterUserDto } from './dto/filter-user.dto';
 @ApiTags('Usuários')
 @ApiBearerAuth()
 @Controller('users')
@@ -49,13 +52,18 @@ export class UsersController {
   @ApiResponse({
     status: 200,
     description: 'Lista de usuários retornada com sucesso',
+    type: UserResponseDto,
   })
   @ApiResponse({ status: 403, description: 'Acesso negado' })
-  async findAllUsers(@Request() req: AuthenticatedRequest) {
+  async findAllUsers(
+    @Request() req: AuthenticatedRequest,
+    @Query() query: FilterUserDto,
+  ) {
     if (req.user.role !== 'admin') {
       throw new ForbiddenException('Acesso negado.');
     }
-    return this.usersService.findAllUsers();
+    const { role, sortBy = 'id', order = 'asc' } = query;
+    return this.usersService.findAllUsers({ role, sortBy, order });
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

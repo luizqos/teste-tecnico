@@ -34,8 +34,24 @@ export class UsersService {
     const user = await this.repo.findOne({ where: { email } });
     return user ?? undefined;
   }
-  async findAllUsers(): Promise<UserResponseDto[]> {
-    const users = await this.repo.find();
+  async findAllUsers(params: {
+    role?: string;
+    sortBy: string;
+    order: 'asc' | 'desc';
+  }): Promise<UserResponseDto[]> {
+    const { role, sortBy, order } = params;
+
+    const where: Record<string, any> = {};
+    if (role) {
+      where.role = role;
+    }
+    const users = await this.repo.find({
+      where,
+      order: {
+        [sortBy]: order.toUpperCase(),
+      },
+    });
+
     return users.map(({ ...user }) => user);
   }
   async findById(id: number): Promise<UserResponseDto | undefined> {
