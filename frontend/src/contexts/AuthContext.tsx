@@ -9,6 +9,7 @@ interface User {
   name: string;
   email: string;
   role: string;
+  createdAt?: Date;
 }
 
 interface JwtPayload {
@@ -16,6 +17,7 @@ interface JwtPayload {
   email: string;
   name: string;
   role: string;
+  createdAt: Date;
   iat: number;
   exp: number;
 }
@@ -45,6 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         name: decoded.name,
         email: decoded.email,
         role: decoded.role,
+        createdAt: decoded.createdAt
       };
       setUser(currentUser);
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -62,6 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         name: decoded.name,
         email: decoded.email,
         role: decoded.role,
+        createdAt: decoded.createdAt
       };
       
       localStorage.setItem('token', token);
