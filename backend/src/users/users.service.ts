@@ -25,6 +25,13 @@ export class UsersService {
     password: string;
     role?: string;
   }) {
+    data.email = data.email.toLowerCase();
+    const existingUser = await this.findByEmail(data.email);
+    if (existingUser) {
+      throw new Error('Usuário já existe com este e-mail.');
+    }
+    data.name = data.name.toUpperCase();
+
     const hashedPassword = await this.hashPassword(data.password);
     const user = this.usersRepository.create({
       ...data,
@@ -84,6 +91,14 @@ export class UsersService {
   }
 
   async update(id: number, dto: UpdateUserDto) {
+    dto.name = dto.name?.toUpperCase();
+    dto.email = dto.email?.toLowerCase();
+    if (dto.email) {
+      const existingUser = await this.findByEmail(dto.email);
+      if (existingUser && existingUser.id !== id) {
+        throw new Error('Já existe um usuário com este e-mail.');
+      }
+    }
     if (dto.password) {
       dto.password = await this.hashPassword(dto.password);
     }
@@ -92,7 +107,16 @@ export class UsersService {
   }
 
   async remove(id: number) {
-    return this.usersRepository.delete(id);
+    const user = await this.usersRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new Error('Usuário não encontrado.');
+    }
+    const updatedUser = { ...user, status: false };
+    await this.usersRepository.update(id, updatedUser);
+    if (user.id === 1) {
+      throw new Error('Não é possível excluir o usuário administrador master.');
+    }
+    return this.findById(id);
   }
 
   async create(dto: CreateUserDto) {

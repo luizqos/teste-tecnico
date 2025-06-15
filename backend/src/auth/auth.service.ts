@@ -61,13 +61,22 @@ export class AuthService {
 
   async register(dto: RegisterDto) {
     const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const existingUser = await this.usersService.findByEmail(dto.email);
+    if (existingUser) {
+      throw new UnauthorizedException('Usuário já existe com este e-mail');
+    }
+    if (!dto.email || !dto.name || !dto.password) {
+      throw new UnauthorizedException('Dados inválidos para registro');
+    }
     const newUser = await this.usersService.create({
-      email: dto.email,
+      email: dto.email.toLowerCase(),
       name: dto.name,
       password: hashedPassword,
-      role: dto.role,
+      role: 'user',
     });
-
+    if (!newUser) {
+      throw new UnauthorizedException('Erro ao registrar usuário');
+    }
     return this.login(newUser);
   }
 }
