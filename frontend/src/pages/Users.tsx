@@ -27,6 +27,8 @@ import {
   CardInfo,
   Select,
   CardActions,
+  RadioGroup,
+  RadioLabel,
 } from '../components/styles/Users.styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPen, faTrash, faPlus, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
@@ -73,7 +75,7 @@ export default function Users() {
 
     try {
       await api.delete(`/users/${id}`);
-      setUsers(users.filter((u) => u.id !== id));
+      fetchUsers();
     } catch (err) {
       console.error(err);
       alert('Erro ao excluir usuário');
@@ -87,10 +89,19 @@ export default function Users() {
   };
 
   const handleOpenCreate = () => {
-    setEditUser({ id: 0, name: '', email: '', role: 'user', lastLogin: '', password: '' });
+    setEditUser({
+      id: 0,
+      name: '',
+      email: '',
+      role: 'user',
+      lastLogin: '',
+      password: '',
+      status: true,
+    });
     setIsNew(true);
     setIsModalOpen(true);
   };
+
 
   const handleCloseModal = () => {
     setEditUser(null);
@@ -109,20 +120,20 @@ export default function Users() {
           alert('Senha é obrigatória para novo usuário');
           return;
         }
-        const payload = password ? { ...rest, password } : rest;
-        const { data } = await api.post(`/users`, payload);
-        setUsers([...users, data]);
+        const payload = { ...rest, password };
+        await api.post(`/users`, payload);
       } else {
         const payload = password ? { ...rest, password } : rest;
-        const { data } = await api.patch(`/users/${id}`, payload);
-        setUsers(users.map((u) => (u.id === id ? { ...u, ...data } : u)));
+        await api.patch(`/users/${id}`, payload);
       }
       handleCloseModal();
+      fetchUsers();
     } catch (err) {
       console.error(err);
       alert('Erro ao salvar usuário');
     }
   };
+
 
   const filteredUsers = users
     .filter(
@@ -337,6 +348,30 @@ export default function Users() {
                 <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} />
               </button>
             </div>
+
+            <label>Status</label>
+            <RadioGroup>
+              <RadioLabel>
+                <input
+                  type="radio"
+                  name="status"
+                  value="ativo"
+                  checked={editUser.status === true}
+                  onChange={() => setEditUser({ ...editUser, status: true })}
+                />
+                Ativo
+              </RadioLabel>
+              <RadioLabel>
+                <input
+                  type="radio"
+                  name="status"
+                  value="inativo"
+                  checked={editUser.status === false}
+                  onChange={() => setEditUser({ ...editUser, status: false })}
+                />
+                Inativo
+              </RadioLabel>
+            </RadioGroup>
 
             <label>Permissão</label>
             <Select
