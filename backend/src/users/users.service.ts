@@ -14,14 +14,18 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
+  private async hashPassword(password: string): Promise<string> {
+    const saltOrRounds = 10;
+    return bcrypt.hash(password, saltOrRounds);
+  }
+
   async createUser(data: {
     email: string;
     name: string;
     password: string;
     role?: string;
   }) {
-    const saltOrRounds = 10;
-    const hashedPassword = await bcrypt.hash(data.password, saltOrRounds);
+    const hashedPassword = await this.hashPassword(data.password);
     const user = this.usersRepository.create({
       ...data,
       password: hashedPassword,
@@ -80,10 +84,8 @@ export class UsersService {
   }
 
   async update(id: number, dto: UpdateUserDto) {
-    const saltOrRounds = 10;
     if (dto.password) {
-      const hashedPassword = await bcrypt.hash(dto.password, saltOrRounds);
-      dto.password = hashedPassword;
+      dto.password = await this.hashPassword(dto.password);
     }
     await this.usersRepository.update(id, dto);
     return this.findById(id);

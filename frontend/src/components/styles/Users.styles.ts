@@ -120,7 +120,7 @@ export const ActionButton = styled.button<{ danger?: boolean }>`
 export const Modal = styled.div`
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.5); // Fundo mais escuro e opaco
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
