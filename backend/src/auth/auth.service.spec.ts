@@ -54,7 +54,7 @@ describe('AuthService', () => {
     service = module.get<AuthService>(AuthService);
   });
 
-  it('deve validar o usuário com credenciais corretas', async () => {
+  it('should validate the user with correct credentials', async () => {
     const user = await service.validateUser('admin@example.com', '123456');
     expect(user.email).toBe('admin@example.com');
     expect(mockUsersRepository.findOne).toHaveBeenCalledWith({
@@ -63,7 +63,7 @@ describe('AuthService', () => {
     expect(mockUsersRepository.save).toHaveBeenCalled();
   });
 
-  it('deve lançar exceção se credenciais forem inválidas', async () => {
+  it('should throw an exception if credentials are invalid', async () => {
     const wrongPasswordUser = {
       ...mockUser,
       password: bcrypt.hashSync('outrasenha', 10),
@@ -72,18 +72,18 @@ describe('AuthService', () => {
 
     await expect(
       service.validateUser('admin@example.com', 'senhaErrada'),
-    ).rejects.toThrow('Credencias inválidas');
+    ).rejects.toThrow('Credenciais inválidas');
   });
 
-  it('deve lançar exceção se o usuário não for encontrado', async () => {
+  it('should throw an exception if the user is not found', async () => {
     mockUsersRepository.findOne.mockResolvedValueOnce(null);
 
     await expect(
       service.validateUser('inexistente@example.com', '123456'),
-    ).rejects.toThrow('Credencias inválidas');
+    ).rejects.toThrow('Credenciais inválidas');
   });
 
-  it('deve retornar um token no login', () => {
+  it('should return a token on login', () => {
     const token = service.login(mockLoginUser);
     expect(token.access_token).toBe('fake-jwt-token');
     expect(mockJwtService.sign).toHaveBeenCalledWith({

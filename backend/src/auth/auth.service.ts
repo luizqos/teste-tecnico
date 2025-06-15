@@ -29,13 +29,13 @@ export class AuthService {
   ): Promise<UserResponseDto> {
     const user = await this.usersRepository.findOne({ where: { email } });
     if (!user) {
-      throw new UnauthorizedException('Credencias inválidas');
+      throw new UnauthorizedException('Credenciais inválidas');
     }
 
     const passwordValid = await bcrypt.compare(password, user.password);
 
     if (!passwordValid) {
-      throw new UnauthorizedException('Credencias inválidas');
+      throw new UnauthorizedException('Credenciais inválidas');
     }
 
     user.lastLogin = new Date();
