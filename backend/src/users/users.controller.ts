@@ -62,8 +62,13 @@ export class UsersController {
     if (req.user.role !== 'admin') {
       throw new ForbiddenException('Acesso negado.');
     }
-    const { role, sortBy = 'id', order = 'asc' } = query;
-    return this.usersService.findAllUsers({ role, sortBy, order });
+    const { role, sortBy = 'id', order = 'asc', daysWithoutLogin } = query;
+    return this.usersService.findAllUsers({
+      role,
+      sortBy,
+      order,
+      daysWithoutLogin,
+    });
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

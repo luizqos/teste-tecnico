@@ -1,4 +1,4 @@
-import { IsOptional, IsIn } from 'class-validator';
+import { IsOptional, IsIn, IsNumberString } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 export class FilterUserDto {
   @ApiPropertyOptional({
@@ -26,4 +26,12 @@ export class FilterUserDto {
   @IsOptional()
   @IsIn(['asc', 'desc'])
   order?: 'asc' | 'desc';
+
+  @ApiPropertyOptional({
+    description: 'Quantidade de dias sem login',
+    example: '30',
+  })
+  @IsOptional()
+  @IsNumberString()
+  daysWithoutLogin?: string;
 }

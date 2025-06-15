@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, LessThan } from 'typeorm';
 import { User } from './entities/user.entity';
 import { UserResponseDto } from './dto/user-response.dto';
 import * as bcrypt from 'bcrypt';
@@ -34,17 +34,34 @@ export class UsersService {
     const user = await this.usersRepository.findOne({ where: { email } });
     return user ?? undefined;
   }
+
   async findAllUsers(params: {
     role?: string;
     sortBy: string;
     order: 'asc' | 'desc';
+    daysWithoutLogin?: string;
   }): Promise<UserResponseDto[]> {
-    const { role, sortBy, order } = params;
+    const { role, sortBy, order, daysWithoutLogin } = params;
 
-    const where: Record<string, any> = {};
+    const user: Record<string, any> = {};
     if (role) {
-      where.role = role;
+      user.role = role;
     }
+
+    let where: Record<string, any> | Record<string, any>[] = user;
+
+    if (daysWithoutLogin) {
+      const days = parseInt(daysWithoutLogin, 10);
+      const dateThreshold = new Date();
+      dateThreshold.setDate(dateThreshold.getDate() - days);
+
+      user.status = true;
+      where = [
+        { ...user, lastLogin: null, createdAt: LessThan(dateThreshold) },
+        { ...user, lastLogin: LessThan(dateThreshold) },
+      ];
+    }
+
     const users = await this.usersRepository.find({
       where,
       order: {
@@ -54,6 +71,7 @@ export class UsersService {
 
     return users.map(({ ...user }) => user);
   }
+
   async findById(id: number): Promise<UserResponseDto | undefined> {
     const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) return undefined;
