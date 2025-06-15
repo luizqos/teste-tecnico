@@ -49,8 +49,11 @@ cd teste-tecnico
 Crie um arquivo `.env` na raiz do backend com:
 
 ```env
-JWT_SECRET=seuSegredoJWT
 DATABASE=database.sqlite
+PORT=3000
+JWT_SECRET=seuSegredoJWT
+JWT_EXPIRES_IN=2h
+
 ```
 
 > ⚠️ O arquivo `.env` do frontend é usado **apenas em tempo de build**. Se necessário, configure no frontend com variáveis `VITE_` se estiver usando Vite.
