@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThan } from 'typeorm';
+import { Repository, LessThan, Not } from 'typeorm';
 import { User } from './entities/user.entity';
 import { UserResponseDto } from './dto/user-response.dto';
 import * as bcrypt from 'bcrypt';
@@ -61,6 +61,7 @@ export class UsersService {
     }
 
     let where: Record<string, any> | Record<string, any>[] = user;
+    where = { email: Not('admin@admin.com'), ...where };
 
     if (daysWithoutLogin) {
       const days = parseInt(daysWithoutLogin, 10);

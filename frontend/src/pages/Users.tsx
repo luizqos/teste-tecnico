@@ -30,6 +30,7 @@ import {
 } from '../components/styles/Users.styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPen, faTrash, faPlus, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { formatDate } from '../functions/formatDate';
 
 interface User {
   id: number;
@@ -223,7 +224,7 @@ export default function Users() {
                     <Td>{user.role === 'admin' ? 'Administrador' : 'Usuário'}</Td>
                     <Td>
                       {user.lastLogin
-                        ? new Date(user.lastLogin).toLocaleDateString()
+                        ? formatDate(user.lastLogin)
                         : '-'}
                     </Td>
                     <Td>
@@ -266,7 +267,7 @@ export default function Users() {
                   <span>Último Login</span>
                   <strong>
                     {user.lastLogin
-                      ? new Date(user.lastLogin).toLocaleDateString()
+                      ? formatDate(user.lastLogin)
                       : '-'}
                   </strong>
                 </CardItem>
