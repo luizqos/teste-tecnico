@@ -107,6 +107,30 @@ export const LoginFormArea = styled.div`
   }
 `;
 
+export const PasswordWrapper = styled.div`
+  position: relative;
+`;
+
+export const TogglePasswordButton = styled.button`
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #555;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    color: #000;
+  }
+`;
+
+
 export const ImageArea = styled.div`
   flex: 2;
   background-image: url('/login-background.jpg');
