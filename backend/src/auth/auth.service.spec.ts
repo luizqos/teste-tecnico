@@ -11,7 +11,7 @@ import { User } from '../users/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { UserResponseDto } from 'src/users/dto/user-response.dto';
 import { Repository } from 'typeorm';
-import { UnauthorizedException } from '@nestjs/common';
+import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto';
 
 describe('AuthService', () => {
@@ -34,6 +34,7 @@ describe('AuthService', () => {
     name: 'Admin',
     email: 'admin@example.com',
     role: 'admin',
+    createdAt: new Date(),
   };
 
   const mockUsersService = {
@@ -128,12 +129,15 @@ describe('AuthService', () => {
         name: 'Admin',
         sub: 1,
         role: 'admin',
+        createdAt: expect.any(Date),
       });
     });
   });
 
   describe('register', () => {
     it('should register a new user and return token', async () => {
+      mockUsersService.findByEmail = jest.fn().mockResolvedValue(null);
+
       const registerDto: RegisterDto = {
         email: 'newuser@example.com',
         name: 'New User',
@@ -145,12 +149,77 @@ describe('AuthService', () => {
 
       expect(mockUsersService.create).toHaveBeenCalledWith({
         email: 'newuser@example.com',
-        name: 'New User',
+        name: 'NEW USER',
         password: expect.any(String),
         role: 'user',
       });
 
       expect(token).toEqual({ access_token: 'fake-jwt-token' });
+    });
+
+    it('should throw if user already exists', async () => {
+      mockUsersService.findByEmail = jest.fn().mockResolvedValue(mockUser);
+
+      await expect(
+        authService.register({
+          email: 'admin@example.com',
+          name: 'Admin',
+          password: '123456',
+          role: 'user',
+        }),
+      ).rejects.toThrow(
+        new UnauthorizedException('Usuário já existe com este e-mail'),
+      );
+
+      expect(mockUsersService.findByEmail).toHaveBeenCalledWith(
+        'admin@example.com',
+      );
+    });
+
+    it('should throw if registration data is incomplete', async () => {
+      mockUsersService.findByEmail = jest.fn().mockResolvedValue(null);
+
+      await expect(
+        authService.register({
+          email: '',
+          name: '',
+          password: '',
+          role: 'user',
+        }),
+      ).rejects.toThrow(
+        new UnauthorizedException('Dados inválidos para registro'),
+      );
+    });
+  });
+
+  describe('updateProfile', () => {
+    it('should update user profile successfully', async () => {
+      usersRepository.findOne.mockResolvedValueOnce(mockUser);
+      usersRepository.save.mockResolvedValueOnce({
+        ...mockUser,
+        name: 'JOHN DOE',
+      });
+
+      const result = await authService.updateProfile(1, {
+        name: 'John Doe',
+        id: 1,
+      });
+
+      expect(result).toEqual({ message: 'Perfil atualizado com sucesso' });
+      expect(usersRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'JOHN DOE' }),
+      );
+    });
+
+    it('should throw if user not found', async () => {
+      usersRepository.findOne.mockResolvedValueOnce(null);
+
+      await expect(
+        authService.updateProfile(999, {
+          name: 'test',
+          id: 0,
+        }),
+      ).rejects.toThrow(new NotFoundException('Usuário não encontrado'));
     });
   });
 });

@@ -35,6 +35,7 @@ export default function Profile() {
     try {
       setLoading(true);
       await api.patch('/auth/profile', {
+        id: user?.id,
         name,
         password: password !== '' ? password : undefined,
       });

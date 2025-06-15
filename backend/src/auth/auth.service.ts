@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -8,6 +12,7 @@ import { User } from '../users/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserResponseDto } from 'src/users/dto/user-response.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
 export class AuthService {
@@ -58,6 +63,7 @@ export class AuthService {
       name: user.name,
       sub: user.id,
       role: user.role,
+      createdAt: user.createdAt,
     };
     return {
       access_token: this.jwtService.sign(payload),
@@ -83,5 +89,27 @@ export class AuthService {
       throw new UnauthorizedException('Erro ao registrar usuário');
     }
     return this.login(newUser);
+  }
+
+  async updateProfile(id: number, userUpdated: UpdateProfileDto) {
+    const user = await this.usersRepository.findOne({ where: { id } });
+
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
+    if (userUpdated.name) {
+      user.name = userUpdated.name.toUpperCase();
+    }
+
+    if (userUpdated.password) {
+      user.password = await this.hashPassword(userUpdated.password);
+    }
+
+    await this.usersRepository.save(user);
+
+    return {
+      message: 'Perfil atualizado com sucesso',
+    };
   }
 }
