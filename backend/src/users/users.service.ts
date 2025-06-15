@@ -25,17 +25,18 @@ export class UsersService {
     password: string;
     role?: string;
   }) {
-    data.email = data.email.toLowerCase();
     const existingUser = await this.findByEmail(data.email);
     if (existingUser) {
       throw new Error('Usuário já existe com este e-mail.');
     }
-    data.name = data.name.toUpperCase();
-
-    const hashedPassword = await this.hashPassword(data.password);
+    if (!data.email || !data.name || !data.password) {
+      throw new Error('Todos os campos são obrigatórios.');
+    }
+    const password = await this.hashPassword(data.password);
     const user = this.usersRepository.create({
-      ...data,
-      password: hashedPassword,
+      email: data.email.toLowerCase(),
+      name: data.name.toUpperCase(),
+      password,
       role: data.role || 'user',
     });
     return this.usersRepository.save(user);

@@ -23,6 +23,11 @@ export class AuthService {
     return this.configService.get<string>('JWT_SECRET');
   }
 
+  private async hashPassword(password: string): Promise<string> {
+    const saltOrRounds = 10;
+    return bcrypt.hash(password, saltOrRounds);
+  }
+
   async validateUser(
     email: string,
     password: string,
@@ -60,7 +65,6 @@ export class AuthService {
   }
 
   async register(dto: RegisterDto) {
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
     const existingUser = await this.usersService.findByEmail(dto.email);
     if (existingUser) {
       throw new UnauthorizedException('Usuário já existe com este e-mail');
@@ -68,10 +72,11 @@ export class AuthService {
     if (!dto.email || !dto.name || !dto.password) {
       throw new UnauthorizedException('Dados inválidos para registro');
     }
+    const password = await this.hashPassword(dto.password);
     const newUser = await this.usersService.create({
       email: dto.email.toLowerCase(),
-      name: dto.name,
-      password: hashedPassword,
+      name: dto.name.toUpperCase(),
+      password,
       role: 'user',
     });
     if (!newUser) {
