@@ -70,6 +70,13 @@ docker compose up -d --build
 - **Frontend:** [http://localhost](http://localhost)
 - **Backend API + Swagger:** [http://localhost:3000/api](http://localhost:3001/api)
 
+### 👥 Usuários Pré-cadastrados
+
+| Email            | Senha      | Permissão     |
+| -----------------| -----------| --------------|
+| admin@admin.com  | admin@123  | Administrador |
+| user@user.com    | user@123   | Usuário       |
+
 ---
 
 ### 🐳 Principais comandos Docker
