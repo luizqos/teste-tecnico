@@ -27,9 +27,11 @@ export class AuthService {
     email: string,
     password: string,
   ): Promise<UserResponseDto> {
-    const user = await this.usersRepository.findOne({ where: { email } });
+    const user = await this.usersRepository.findOne({
+      where: { email, status: true },
+    });
     if (!user) {
-      throw new UnauthorizedException('Credenciais inválidas');
+      throw new UnauthorizedException('Acesso negado');
     }
 
     const passwordValid = await bcrypt.compare(password, user.password);

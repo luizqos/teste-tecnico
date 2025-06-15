@@ -38,6 +38,7 @@ interface User {
   role: string;
   lastLogin: string;
   password?: string;
+  status?: boolean;
 }
 
 export default function Users() {
@@ -122,7 +123,6 @@ export default function Users() {
     }
   };
 
-
   const filteredUsers = users
     .filter(
       (u) =>
@@ -135,11 +135,8 @@ export default function Users() {
       return a.name.localeCompare(b.name);
     });
 
-  const isInactive = (lastLogin: string) => {
-    const diff =
-      (new Date().getTime() - new Date(lastLogin).getTime()) /
-      (1000 * 60 * 60 * 24);
-    return diff > 30;
+  const isInactive = (status?: boolean) => {
+    return !status;
   };
 
   const totalUsers = users.length;
@@ -215,7 +212,7 @@ export default function Users() {
                   <Tr key={user.id}>
                     <Td>{user.id}</Td>
                     <Td>
-                      {isInactive(user.lastLogin) ? (
+                      {isInactive(user.status) ? (
                         <Badge status="inativo">Inativo</Badge>
                       ) : (
                         <Badge status="ativo">Ativo</Badge>
@@ -251,8 +248,8 @@ export default function Users() {
                 </CardItem>
                 <CardItem>
                   <span>Status</span>
-                  <Badge status={isInactive(user.lastLogin) ? "inativo" : "ativo"}>
-                    {isInactive(user.lastLogin) ? 'Inativo' : 'Ativo'}
+                  <Badge status={isInactive(user.status) ? "inativo" : "ativo"}>
+                    {isInactive(user.status) ? 'Inativo' : 'Ativo'}
                   </Badge>
                 </CardItem>
                 <CardItem>
