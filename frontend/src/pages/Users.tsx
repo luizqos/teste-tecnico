@@ -30,7 +30,7 @@ import {
 } from '../components/styles/Users.styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPen, faTrash, faPlus, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-import { formatDate } from '../functions/formatDate';
+import { formatDate } from '../utils/formatDate';
 
 interface User {
   id: number;
