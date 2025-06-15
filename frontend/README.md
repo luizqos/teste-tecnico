@@ -1,54 +1,122 @@
-# React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# Frontend - User Management
 
-Currently, two official plugins are available:
+Este é o **Frontend** da aplicação de gerenciamento de usuários, desenvolvido em **React** com **Styled-Components** para estilização. Este projeto permite cadastro, edição, filtro, ordenação e visualização de usuários. O frontend consome a API REST desenvolvida em NestJS (disponível no repositório backend).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🧠 Tecnologias e Ferramentas
 
-## Expanding the ESLint configuration
+- **React**
+- **Vite**
+- **Styled-Components**
+- **Axios**
+- **React Router**
+- **Docker**
+- **Nginx** (para servir a aplicação em ambiente de produção)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 📦 Pré-requisitos
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- Docker e Docker Compose instalados na máquina.
+
+## 🚀 Executando o projeto
+
+### ✅ Via Docker (Recomendado)
+
+1. Crie um arquivo `.env` na raiz do projeto frontend, com o seguinte conteúdo:
+
+```env
+VITE_REACT_APP_API_URL=http://backend:3000
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+> ⚠️ Ajuste o valor da variável `VITE_REACT_APP_API_URL` de acordo com onde o backend está rodando (pode ser IP ou domínio).
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+2. Execute o comando:
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+```bash
+docker compose up --build
 ```
+
+3. Acesse no navegador:
+
+```plaintext
+http://localhost
+```
+
+### ✅ Localmente (sem Docker)
+
+1. Instale as dependências:
+
+```bash
+npm install
+```
+
+2. Crie o arquivo `.env`:
+
+```env
+VITE_REACT_APP_API_URL=http://localhost:3000
+```
+
+3. Execute o projeto:
+
+```bash
+npm run dev
+```
+
+4. Acesse via navegador:
+
+```plaintext
+http://localhost:5173
+```
+
+## 🐳 Estrutura de Docker
+
+O frontend está configurado para rodar com **Nginx** em produção. O Dockerfile realiza:
+
+- Build da aplicação React.
+- Geração dos arquivos estáticos na pasta `dist`.
+- Servindo via Nginx com um arquivo `nginx.conf` customizado para tratar rotas do React (evita erro 404 em rotas como `/register` ou `/login`).
+
+## 📁 Estrutura de pastas (simplificada)
+
+```
+frontend/
+├── public/
+├── src/
+│   ├── components/
+│   ├── contexts/
+│   ├── pages/
+│   ├── services/
+│   ├── styles/
+│   └── App.tsx
+├── .env
+├── Dockerfile
+├── docker-compose.yml
+├── nginx.conf
+├── package.json
+└── README.md
+```
+
+## 🔧 Variáveis de Ambiente
+
+| Nome           | Descrição                          | Exemplo                      |
+| ---------------| ---------------------------------- | ---------------------------- |
+| `VITE_REACT_APP_API_URL` | URL da API backend (NestJS)       | `http://localhost:3000`      |
+
+## 🏗️ Decisões de Arquitetura e Design
+
+- O projeto foi construído utilizando **React + Vite** para garantir velocidade no desenvolvimento e build.
+- O layout foi feito com **Styled-Components**, priorizando responsividade e simplicidade.
+- Utilização do **React Context API** para controle de autenticação.
+- As chamadas à API são centralizadas no serviço `api.ts` utilizando **Axios**.
+- O roteamento foi implementado com **React Router**, garantindo navegação SPA fluida.
+- A aplicação foi preparada para produção com Nginx, incluindo configuração para fallback de rotas (`try_files`) evitando erros 404 em páginas acessadas diretamente.
+- A utilização do Docker permite consistência de ambiente, tanto em desenvolvimento quanto produção.
+
+## 🤝 Contribuição
+
+Contribuições são bem-vindas! Sinta-se livre para abrir issues ou enviar pull requests.
+
+---
+
+### 🧠 Autor
+
+Desenvolvido por Luiz Silva 🚀
