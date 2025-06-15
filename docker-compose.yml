@@ -1,17 +1,20 @@
 services:
   backend:
     build: ./backend
-    container_name: backend
+    container_name: backend-app
     ports:
-      - "3000:3000"
+      - '3000:3000'
+    volumes:
+      - ./backend/data:/app/data
     env_file:
       - ./backend/.env
+    restart: unless-stopped
 
   frontend:
     build: ./frontend
-    container_name: frontend
+    container_name: frontend-app
     ports:
-      - "5173:80"
-    depends_on:
-      - backend
-
+      - '80:80'
+    env_file:
+      - ./frontend/.env
+    restart: unless-stopped
