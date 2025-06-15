@@ -10,6 +10,8 @@ import {
   NotFoundException,
   ParseIntPipe,
   Delete,
+  Post,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -23,6 +25,9 @@ import {
 } from '@nestjs/swagger';
 
 import { AuthenticatedRequest } from 'src/auth/interfaces/authenticated-request.interface';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UserResponseDto } from './dto/user-response.dto';
+import { FilterUserDto } from './dto/filter-user.dto';
 @ApiTags('Usuários')
 @ApiBearerAuth()
 @Controller('users')
@@ -47,13 +52,37 @@ export class UsersController {
   @ApiResponse({
     status: 200,
     description: 'Lista de usuários retornada com sucesso',
+    type: UserResponseDto,
   })
   @ApiResponse({ status: 403, description: 'Acesso negado' })
-  async findAllUsers(@Request() req: AuthenticatedRequest) {
+  async findAllUsers(
+    @Request() req: AuthenticatedRequest,
+    @Query() query: FilterUserDto,
+  ) {
     if (req.user.role !== 'admin') {
       throw new ForbiddenException('Acesso negado.');
     }
-    return this.usersService.findAllUsers();
+    const { role, sortBy = 'id', order = 'asc', daysWithoutLogin } = query;
+    return this.usersService.findAllUsers({
+      role,
+      sortBy,
+      order,
+      daysWithoutLogin,
+    });
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Post()
+  @ApiOperation({ summary: 'Cadastra novo usuário' })
+  @ApiResponse({ status: 201, description: 'Usuário Cadastrado com sucesso' })
+  async register(
+    @Body() createUserDto: CreateUserDto,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    if (req.user.role !== 'admin') {
+      throw new ForbiddenException('Acesso negado.');
+    }
+    return this.usersService.createUser(createUserDto);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -64,13 +93,13 @@ export class UsersController {
   async update(
     @Request() req: AuthenticatedRequest,
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateUserDto: UpdateUserDto,
+    @Body() dto: UpdateUserDto,
   ) {
     if (req.user.id !== id && req.user.role !== 'admin') {
       throw new ForbiddenException('Você não pode atualizar outro usuário.');
     }
-
-    return this.usersService.update(id, updateUserDto);
+    await this.usersService.update(id, dto);
+    return this.usersService.findById(id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

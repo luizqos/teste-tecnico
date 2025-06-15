@@ -11,7 +11,7 @@ export default function Register() {
 
   const handleRegister = async () => {
     try {
-      await api.post('/auth/register', { name, email, password });
+      await api.post('/auth/register', { name, email, password, role: 'user' });
       navigate('/login');
     } catch (err) {
       console.error(err);

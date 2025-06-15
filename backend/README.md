@@ -19,7 +19,7 @@ Este projeto é uma API RESTful construída com **NestJS**, implementando funcio
 
 ## ✅ Pré-requisitos
 
-- [Node.js](https://nodejs.org/) v18 ou superior
+- [Node.js](https://nodejs.org/) v22 ou superior
 - npm ou yarn
 - Banco de dados (PostgreSQL, MySQL, SQLite, etc.)
 
@@ -36,14 +36,10 @@ cd teste-tecnico
 
 ## Crie o arquivo .env
 
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-DATABASE_USER=usuario
-DATABASE_PASSWORD=senha
-DATABASE_NAME=nome_do_banco
-
+PORT=3000
+DATABASE=./data/database.sqlite
 JWT_SECRET=sua_chave_jwt
-JWT_EXPIRATION=3600s
+JWT_EXPIRATION=2h
 
 ## Instale as dependências
 

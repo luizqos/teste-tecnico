@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, LessThan } from 'typeorm';
 import { User } from './entities/user.entity';
 import { UserResponseDto } from './dto/user-response.dto';
 import * as bcrypt from 'bcrypt';
@@ -11,8 +11,13 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private readonly repo: Repository<User>,
+    private readonly usersRepository: Repository<User>,
   ) {}
+
+  private async hashPassword(password: string): Promise<string> {
+    const saltOrRounds = 10;
+    return bcrypt.hash(password, saltOrRounds);
+  }
 
   async createUser(data: {
     email: string;
@@ -20,42 +25,78 @@ export class UsersService {
     password: string;
     role?: string;
   }) {
-    const saltOrRounds = 10;
-    const hashedPassword = await bcrypt.hash(data.password, saltOrRounds);
-    const user = this.repo.create({
+    const hashedPassword = await this.hashPassword(data.password);
+    const user = this.usersRepository.create({
       ...data,
       password: hashedPassword,
       role: data.role || 'user',
     });
-    return this.repo.save(user);
+    return this.usersRepository.save(user);
   }
 
   async findByEmail(email: string): Promise<User | undefined> {
-    const user = await this.repo.findOne({ where: { email } });
+    const user = await this.usersRepository.findOne({ where: { email } });
     return user ?? undefined;
   }
-  async findAllUsers(): Promise<UserResponseDto[]> {
-    const users = await this.repo.find();
+
+  async findAllUsers(params: {
+    role?: string;
+    sortBy: string;
+    order: 'asc' | 'desc';
+    daysWithoutLogin?: string;
+  }): Promise<UserResponseDto[]> {
+    const { role, sortBy, order, daysWithoutLogin } = params;
+
+    const user: Record<string, any> = {};
+    if (role) {
+      user.role = role;
+    }
+
+    let where: Record<string, any> | Record<string, any>[] = user;
+
+    if (daysWithoutLogin) {
+      const days = parseInt(daysWithoutLogin, 10);
+      const dateThreshold = new Date();
+      dateThreshold.setDate(dateThreshold.getDate() - days);
+
+      user.status = true;
+      where = [
+        { ...user, lastLogin: null, createdAt: LessThan(dateThreshold) },
+        { ...user, lastLogin: LessThan(dateThreshold) },
+      ];
+    }
+
+    const users = await this.usersRepository.find({
+      where,
+      order: {
+        [sortBy]: order.toUpperCase(),
+      },
+    });
+
     return users.map(({ ...user }) => user);
   }
+
   async findById(id: number): Promise<UserResponseDto | undefined> {
-    const user = await this.repo.findOne({ where: { id } });
+    const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) return undefined;
     const { ...rest } = user;
     return UserResponseDto.fromEntity(rest as User);
   }
 
   async update(id: number, dto: UpdateUserDto) {
-    await this.repo.update(id, dto);
+    if (dto.password) {
+      dto.password = await this.hashPassword(dto.password);
+    }
+    await this.usersRepository.update(id, dto);
     return this.findById(id);
   }
 
   async remove(id: number) {
-    return this.repo.delete(id);
+    return this.usersRepository.delete(id);
   }
 
   async create(dto: CreateUserDto) {
-    const user = this.repo.create(dto);
-    return this.repo.save(user);
+    const user = this.usersRepository.create(dto);
+    return this.usersRepository.save(user);
   }
 }

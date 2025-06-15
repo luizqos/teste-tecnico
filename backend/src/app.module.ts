@@ -24,7 +24,7 @@ import { RolesGuard } from './auth/roles.guard';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         type: 'sqlite',
-        database: config.get<string>('DATABASE') || 'db.sqlite',
+        database: config.get<string>('DATABASE') || './data/database.sqlite',
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: true,
       }),

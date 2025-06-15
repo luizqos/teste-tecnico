@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import {
   Wrapper,
@@ -22,13 +22,15 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login(email, password);
-      alert('Login realizado com sucesso!');
+     await login(email, password);
     } catch (error) {
       console.error(error);
-      alert('Email ou senha inválidos.');
     }
   };
+
+  useEffect(() => {
+    localStorage.clear();
+  }, []);
 
   return (
     <Wrapper>

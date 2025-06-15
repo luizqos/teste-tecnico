@@ -57,17 +57,21 @@ describe('UsersService', () => {
     repo = module.get<Repository<User>>(getRepositoryToken(User));
   });
 
-  it('deve estar definido', () => {
+  it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  it('deve retornar todos os usuários', async () => {
-    const result = await service.findAllUsers();
+  it('should return all users', async () => {
+    const result = await service.findAllUsers({
+      role: undefined,
+      sortBy: 'id',
+      order: 'asc',
+    });
     expect(result.length).toBe(2);
     expect(repo.find).toHaveBeenCalled();
   });
 
-  it('deve retornar um usuário pelo ID', async () => {
+  it('should return a user by ID', async () => {
     const user = await service.findById(1);
     expect(user).toBeDefined();
 
@@ -76,7 +80,7 @@ describe('UsersService', () => {
     }
   });
 
-  it('deve retornar um usuário pelo email', async () => {
+  it('should return a user by email', async () => {
     await service.create({
       name: 'Admin',
       email: 'admin@example.com',
