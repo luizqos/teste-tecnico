@@ -29,6 +29,10 @@ import {
   CardActions,
   RadioGroup,
   RadioLabel,
+  PaginationContainer,
+  PaginationButton,
+  PaginationInfo,
+  PaginationItensPerPage,
 } from '../components/styles/Users.styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPen, faTrash, faPlus, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
@@ -54,6 +58,9 @@ export default function Users() {
   const [search, setSearch] = useState('');
   const [filterRole, setFilterRole] = useState('');
   const [sortBy, setSortBy] = useState<'id' | 'name'>('id');
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const fetchUsers = async () => {
     try {
@@ -102,7 +109,6 @@ export default function Users() {
     setIsModalOpen(true);
   };
 
-
   const handleCloseModal = () => {
     setEditUser(null);
     setIsModalOpen(false);
@@ -134,7 +140,6 @@ export default function Users() {
     }
   };
 
-
   const filteredUsers = users
     .filter(
       (u) =>
@@ -147,9 +152,19 @@ export default function Users() {
       return a.name.localeCompare(b.name);
     });
 
-  const isInactive = (status?: boolean) => {
-    return !status;
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1);
   };
+
+  const isInactive = (status?: boolean) => !status;
 
   const totalUsers = users.length;
   const totalAdmins = users.filter((u) => u.role === 'admin').length;
@@ -198,12 +213,14 @@ export default function Users() {
             <option value="name">Ordenar por Nome</option>
           </Select>
         </FiltersContainer>
+
         <ButtonContainer>
           <Button onClick={handleOpenCreate}>
             <FontAwesomeIcon icon={faPlus} /> Novo Usuário
           </Button>
         </ButtonContainer>
-        {filteredUsers.length === 0 ? (
+
+        {paginatedUsers.length === 0 ? (
           <EmptyMessage>Nenhum usuário encontrado.</EmptyMessage>
         ) : (
           <>
@@ -220,7 +237,7 @@ export default function Users() {
                 </Tr>
               </Thead>
               <Tbody>
-                {filteredUsers.map((user) => (
+                {paginatedUsers.map((user) => (
                   <Tr key={user.id}>
                     <Td>{user.id}</Td>
                     <Td>
@@ -233,11 +250,7 @@ export default function Users() {
                     <Td>{user.name}</Td>
                     <Td>{user.email}</Td>
                     <Td>{user.role === 'admin' ? 'Administrador' : 'Usuário'}</Td>
-                    <Td>
-                      {user.lastLogin
-                        ? formatDate(user.lastLogin)
-                        : '-'}
-                    </Td>
+                    <Td>{user.lastLogin ? formatDate(user.lastLogin) : '-'}</Td>
                     <Td>
                       <ActionButton onClick={() => handleOpenEdit(user)}>
                         <FontAwesomeIcon icon={faPen} />
@@ -250,17 +263,16 @@ export default function Users() {
                 ))}
               </Tbody>
             </Table>
-            {filteredUsers.map((user) => (
+
+            {paginatedUsers.map((user) => (
               <CardRow key={user.id}>
                 <CardItem>
                   <span>ID</span>
-                  <strong>
-                    {user.id}
-                  </strong>
+                  <strong>{user.id}</strong>
                 </CardItem>
                 <CardItem>
                   <span>Status</span>
-                  <Badge status={isInactive(user.status) ? "inativo" : "ativo"}>
+                  <Badge status={isInactive(user.status) ? 'inativo' : 'ativo'}>
                     {isInactive(user.status) ? 'Inativo' : 'Ativo'}
                   </Badge>
                 </CardItem>
@@ -270,17 +282,11 @@ export default function Users() {
                 </CardItem>
                 <CardItem>
                   <span>Permissão</span>
-                  <strong>
-                    {user.role === 'admin' ? 'Administrador' : 'Usuário'}
-                  </strong>
+                  <strong>{user.role === 'admin' ? 'Administrador' : 'Usuário'}</strong>
                 </CardItem>
                 <CardItem>
                   <span>Último Login</span>
-                  <strong>
-                    {user.lastLogin
-                      ? formatDate(user.lastLogin)
-                      : '-'}
-                  </strong>
+                  <strong>{user.lastLogin ? formatDate(user.lastLogin) : '-'}</strong>
                 </CardItem>
                 <CardActions>
                   <ActionButton onClick={() => handleOpenEdit(user)}>
@@ -292,9 +298,44 @@ export default function Users() {
                 </CardActions>
               </CardRow>
             ))}
+
+            <PaginationContainer>
+              <PaginationItensPerPage>
+                <label>
+                  Itens por página:
+                  <Select
+                    value={itemsPerPage.toString()}
+                    onChange={handleItemsPerPageChange}
+                  >
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                  </Select>
+                </label>
+              </PaginationItensPerPage>
+              <PaginationButton
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                Anterior
+              </PaginationButton>
+              <PaginationInfo>
+                Página {currentPage} de {totalPages}
+              </PaginationInfo>
+              <PaginationButton
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                disabled={currentPage === totalPages || totalPages === 0}
+              >
+                Próxima
+              </PaginationButton>
+            </PaginationContainer>
           </>
         )}
       </Card>
+
       {isModalOpen && editUser && (
         <Modal>
           <ModalContent>
@@ -391,7 +432,6 @@ export default function Users() {
           </ModalContent>
         </Modal>
       )}
-
     </Container>
   );
 }

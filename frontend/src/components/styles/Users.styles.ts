@@ -273,7 +273,7 @@ export const FiltersContainer = styled.div`
   gap: 10px;
   margin-bottom: 15px;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: left;
 
   @media (max-width: 600px) {
     flex-direction: column;
@@ -321,4 +321,45 @@ export const CardList = styled.div`
     flex-direction: column;
     gap: 12px;
   }
+`;
+
+export const PaginationContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+`;
+
+export const PaginationItensPerPage = styled.div`
+  display: flex;
+  justify-content: right;
+  align-items: center;
+  gap: 16px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  flex-wrap: wrap;
+`;
+
+
+export const PaginationButton = styled.button<{ disabled?: boolean }>`
+  padding: 8px 16px;
+  background-color: ${({ disabled }) => (disabled ? '#ccc' : '#0077ff')};
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
+  font-weight: 500;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: ${({ disabled }) =>
+      disabled ? '#ccc' : '#005fcc'};
+  }
+`;
+
+export const PaginationInfo = styled.div`
+  font-size: 14px;
+  color: #555;
 `;
