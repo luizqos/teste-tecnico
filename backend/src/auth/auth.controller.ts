@@ -20,12 +20,14 @@ import { JwtAuthGuard } from './auth.guard';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { RolesGuard } from './roles.guard';
 import { AuthenticatedRequest } from './interfaces/authenticated-request.interface';
+import { Public } from './decorators/public.decorator';
 
 @ApiTags('Autenticação')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Public()
   @Post('login')
   @ApiOperation({ summary: 'Autentica um usuário' })
   @ApiResponse({ status: 200, description: 'Token JWT gerado' })
@@ -37,6 +39,7 @@ export class AuthController {
     return this.authService.login(user);
   }
 
+  @Public()
   @Post('register')
   @ApiOperation({ summary: 'Registrar novo usuário' })
   @ApiResponse({ status: 201, description: 'Usuário registrado com sucesso' })
