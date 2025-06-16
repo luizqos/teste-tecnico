@@ -37,7 +37,7 @@ import {
   NavButton,
 } from '../components/styles/Users.styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPen, faTrash, faPlus, faEye, faHome } from '@fortawesome/free-solid-svg-icons';
+import { faPen, faTrash, faPlus, faEye, faHome, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { formatDate } from '../utils/formatDate';
 import { toast } from 'react-toastify';
 
