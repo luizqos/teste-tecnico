@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-// src/auth/roles.guard.ts
 import {
   Injectable,
   CanActivate,
@@ -10,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from './roles.decorator';
-import { IS_PUBLIC_KEY } from './decorators/public.decorator'; // importa aqui
+import { IS_PUBLIC_KEY } from './decorators/public.decorator';
 
 @Injectable()
 export class RolesGuard implements CanActivate {

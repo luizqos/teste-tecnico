@@ -1,8 +1,11 @@
+import { Container, Title, Subtitle } from "../components/styles/Unauthorized.styles";
+import { Link } from 'react-router-dom';
 export default function Unauthorized() {
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>403 - Acesso Negado</h1>
-      <p>Você não tem permissão para acessar essa página.</p>
-    </div>
+    <Container>
+      <Title>403</Title>
+      <Subtitle>Você não tem permissão para acessar esta página.</Subtitle>
+      <Link to="/">Voltar para o início</Link>
+    </Container>
   );
 }
