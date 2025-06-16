@@ -4,6 +4,7 @@ import { AuthProvider } from '../contexts/AuthContext';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
 import Profile from '../pages/Profile';
+import Dashboard from '../pages/Dashboard';
 import Unauthorized from '../pages/Unauthorized';
 import NotFound from '../pages/NotFound';
 import Users from '../pages/Users';
@@ -24,6 +25,14 @@ export default function AppRoutes() {
           element={
             <PrivateRoute roles={['admin']}>
               <Users />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute roles={['admin']}>
+              <Dashboard />
             </PrivateRoute>
           }
         />

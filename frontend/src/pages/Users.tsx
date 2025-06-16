@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import {
   Container,
@@ -33,9 +34,10 @@ import {
   PaginationButton,
   PaginationInfo,
   PaginationItensPerPage,
+  NavButton,
 } from '../components/styles/Users.styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPen, faTrash, faPlus, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { faPen, faTrash, faPlus, faEye, faHome } from '@fortawesome/free-solid-svg-icons';
 import { formatDate } from '../utils/formatDate';
 import { toast } from 'react-toastify';
 
@@ -62,6 +64,7 @@ export default function Users() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const navigate = useNavigate();
 
   const fetchUsers = async () => {
     try {
@@ -177,7 +180,10 @@ export default function Users() {
       <Card>
         <Title>Painel de Usuários</Title>
         <Subtitle>Gerencie os usuários do sistema</Subtitle>
-
+        <NavButton onClick={() => navigate('/dashboard')}>
+          <FontAwesomeIcon icon={faHome} />
+          Ir para Dashboard
+        </NavButton>
         <Dashboard>
           <CardInfo bg="#0077ff">
             <p>Total Usuários</p>

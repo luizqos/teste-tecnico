@@ -342,6 +342,26 @@ export const PaginationItensPerPage = styled.div`
   flex-wrap: wrap;
 `;
 
+export const NavButton = styled.button`
+  background-color: #6c5ce7;
+  color: #fff;
+  padding: 10px 16px;
+  margin: 0 5px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #5a4bd8;
+  }
+`;
 
 export const PaginationButton = styled.button<{ disabled?: boolean }>`
   padding: 8px 16px;
