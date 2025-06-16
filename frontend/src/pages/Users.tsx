@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import {
   Container,
@@ -27,9 +28,18 @@ import {
   CardInfo,
   Select,
   CardActions,
+  RadioGroup,
+  RadioLabel,
+  PaginationContainer,
+  PaginationButton,
+  PaginationInfo,
+  PaginationItensPerPage,
+  NavButton,
 } from '../components/styles/Users.styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPen, faTrash, faPlus, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { faPen, faTrash, faPlus, faEye, faHome, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { formatDate } from '../utils/formatDate';
+import { toast } from 'react-toastify';
 
 interface User {
   id: number;
@@ -52,13 +62,18 @@ export default function Users() {
   const [filterRole, setFilterRole] = useState('');
   const [sortBy, setSortBy] = useState<'id' | 'name'>('id');
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const navigate = useNavigate();
+
   const fetchUsers = async () => {
     try {
       const { data } = await api.get('/users');
       setUsers(data);
     } catch (err) {
       console.error(err);
-      alert('Erro ao buscar usuários');
+      toast.error('Erro ao buscar usuários');
+
     }
   };
 
@@ -72,10 +87,10 @@ export default function Users() {
 
     try {
       await api.delete(`/users/${id}`);
-      setUsers(users.filter((u) => u.id !== id));
+      fetchUsers();
     } catch (err) {
       console.error(err);
-      alert('Erro ao excluir usuário');
+      toast.error('Erro ao excluir usuário');
     }
   };
 
@@ -86,7 +101,15 @@ export default function Users() {
   };
 
   const handleOpenCreate = () => {
-    setEditUser({ id: 0, name: '', email: '', role: 'user', lastLogin: '', password: '' });
+    setEditUser({
+      id: 0,
+      name: '',
+      email: '',
+      role: 'user',
+      lastLogin: '',
+      password: '',
+      status: true,
+    });
     setIsNew(true);
     setIsModalOpen(true);
   };
@@ -105,21 +128,20 @@ export default function Users() {
     try {
       if (isNew) {
         if (!password) {
-          alert('Senha é obrigatória para novo usuário');
+          toast.error('Senha é obrigatória para novo usuário');
           return;
         }
-        const payload = password ? { ...rest, password } : rest;
-        const { data } = await api.post(`/users`, payload);
-        setUsers([...users, data]);
+        const payload = { ...rest, password };
+        await api.post(`/users`, payload);
       } else {
         const payload = password ? { ...rest, password } : rest;
-        const { data } = await api.patch(`/users/${id}`, payload);
-        setUsers(users.map((u) => (u.id === id ? { ...u, ...data } : u)));
+        await api.patch(`/users/${id}`, payload);
       }
       handleCloseModal();
+      fetchUsers();
     } catch (err) {
       console.error(err);
-      alert('Erro ao salvar usuário');
+      toast.error('Erro ao salvar usuário');
     }
   };
 
@@ -135,9 +157,19 @@ export default function Users() {
       return a.name.localeCompare(b.name);
     });
 
-  const isInactive = (status?: boolean) => {
-    return !status;
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1);
   };
+
+  const isInactive = (status?: boolean) => !status;
 
   const totalUsers = users.length;
   const totalAdmins = users.filter((u) => u.role === 'admin').length;
@@ -148,7 +180,10 @@ export default function Users() {
       <Card>
         <Title>Painel de Usuários</Title>
         <Subtitle>Gerencie os usuários do sistema</Subtitle>
-
+        <NavButton onClick={() => navigate('/dashboard')}>
+          <FontAwesomeIcon icon={faHome} />
+          Ir para Dashboard
+        </NavButton>
         <Dashboard>
           <CardInfo bg="#0077ff">
             <p>Total Usuários</p>
@@ -186,12 +221,14 @@ export default function Users() {
             <option value="name">Ordenar por Nome</option>
           </Select>
         </FiltersContainer>
+
         <ButtonContainer>
           <Button onClick={handleOpenCreate}>
             <FontAwesomeIcon icon={faPlus} /> Novo Usuário
           </Button>
         </ButtonContainer>
-        {filteredUsers.length === 0 ? (
+
+        {paginatedUsers.length === 0 ? (
           <EmptyMessage>Nenhum usuário encontrado.</EmptyMessage>
         ) : (
           <>
@@ -208,7 +245,7 @@ export default function Users() {
                 </Tr>
               </Thead>
               <Tbody>
-                {filteredUsers.map((user) => (
+                {paginatedUsers.map((user) => (
                   <Tr key={user.id}>
                     <Td>{user.id}</Td>
                     <Td>
@@ -221,11 +258,7 @@ export default function Users() {
                     <Td>{user.name}</Td>
                     <Td>{user.email}</Td>
                     <Td>{user.role === 'admin' ? 'Administrador' : 'Usuário'}</Td>
-                    <Td>
-                      {user.lastLogin
-                        ? new Date(user.lastLogin).toLocaleDateString()
-                        : '-'}
-                    </Td>
+                    <Td>{user.lastLogin ? formatDate(user.lastLogin) : '-'}</Td>
                     <Td>
                       <ActionButton onClick={() => handleOpenEdit(user)}>
                         <FontAwesomeIcon icon={faPen} />
@@ -238,17 +271,16 @@ export default function Users() {
                 ))}
               </Tbody>
             </Table>
-            {filteredUsers.map((user) => (
+
+            {paginatedUsers.map((user) => (
               <CardRow key={user.id}>
                 <CardItem>
                   <span>ID</span>
-                  <strong>
-                    {user.id}
-                  </strong>
+                  <strong>{user.id}</strong>
                 </CardItem>
                 <CardItem>
                   <span>Status</span>
-                  <Badge status={isInactive(user.status) ? "inativo" : "ativo"}>
+                  <Badge status={isInactive(user.status) ? 'inativo' : 'ativo'}>
                     {isInactive(user.status) ? 'Inativo' : 'Ativo'}
                   </Badge>
                 </CardItem>
@@ -258,17 +290,11 @@ export default function Users() {
                 </CardItem>
                 <CardItem>
                   <span>Permissão</span>
-                  <strong>
-                    {user.role === 'admin' ? 'Administrador' : 'Usuário'}
-                  </strong>
+                  <strong>{user.role === 'admin' ? 'Administrador' : 'Usuário'}</strong>
                 </CardItem>
                 <CardItem>
                   <span>Último Login</span>
-                  <strong>
-                    {user.lastLogin
-                      ? new Date(user.lastLogin).toLocaleDateString()
-                      : '-'}
-                  </strong>
+                  <strong>{user.lastLogin ? formatDate(user.lastLogin) : '-'}</strong>
                 </CardItem>
                 <CardActions>
                   <ActionButton onClick={() => handleOpenEdit(user)}>
@@ -280,9 +306,44 @@ export default function Users() {
                 </CardActions>
               </CardRow>
             ))}
+
+            <PaginationContainer>
+              <PaginationItensPerPage>
+                <label>
+                  Itens por página:
+                  <Select
+                    value={itemsPerPage.toString()}
+                    onChange={handleItemsPerPageChange}
+                  >
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                  </Select>
+                </label>
+              </PaginationItensPerPage>
+              <PaginationButton
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                Anterior
+              </PaginationButton>
+              <PaginationInfo>
+                Página {currentPage} de {totalPages}
+              </PaginationInfo>
+              <PaginationButton
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                disabled={currentPage === totalPages || totalPages === 0}
+              >
+                Próxima
+              </PaginationButton>
+            </PaginationContainer>
           </>
         )}
       </Card>
+
       {isModalOpen && editUser && (
         <Modal>
           <ModalContent>
@@ -337,6 +398,30 @@ export default function Users() {
               </button>
             </div>
 
+            <label>Status</label>
+            <RadioGroup>
+              <RadioLabel>
+                <input
+                  type="radio"
+                  name="status"
+                  value="ativo"
+                  checked={editUser.status === true}
+                  onChange={() => setEditUser({ ...editUser, status: true })}
+                />
+                Ativo
+              </RadioLabel>
+              <RadioLabel>
+                <input
+                  type="radio"
+                  name="status"
+                  value="inativo"
+                  checked={editUser.status === false}
+                  onChange={() => setEditUser({ ...editUser, status: false })}
+                />
+                Inativo
+              </RadioLabel>
+            </RadioGroup>
+
             <label>Permissão</label>
             <Select
               value={editUser.role}
@@ -355,7 +440,6 @@ export default function Users() {
           </ModalContent>
         </Modal>
       )}
-
     </Container>
   );
 }

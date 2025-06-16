@@ -22,6 +22,7 @@ const createMockUser = (id: number, role = 'user') => ({
   email: `user${id}@test.com`,
   password: 'password',
   role,
+  createdAt: new Date(),
 });
 
 const createMockUserDto = (id: number): CreateUserDto => ({

@@ -40,8 +40,8 @@ Este projeto é composto por um **Backend desenvolvido em NestJS com TypeORM e b
 1️⃣ Clone o projeto:
 
 ```bash
-git clone https://github.com/luizqos/teste-tecnico.git
-cd teste-tecnico
+git clone https://github.com/luizqos/user-management.git
+cd user-management
 ```
 
 2️⃣ Configure as variáveis de ambiente:

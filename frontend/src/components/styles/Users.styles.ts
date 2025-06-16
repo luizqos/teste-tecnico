@@ -273,13 +273,31 @@ export const FiltersContainer = styled.div`
   gap: 10px;
   margin-bottom: 15px;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: left;
 
   @media (max-width: 600px) {
     flex-direction: column;
     gap: 8px;
   }
 `;
+
+export const RadioGroup = styled.div`
+  display: flex;
+  gap: 20px;
+  margin-bottom: 10px;
+`;
+
+export const RadioLabel = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+
+  input {
+    cursor: pointer;
+  }
+`;
+
 
 export const Select = styled.select`
   padding: 8px 12px;
@@ -303,4 +321,65 @@ export const CardList = styled.div`
     flex-direction: column;
     gap: 12px;
   }
+`;
+
+export const PaginationContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+`;
+
+export const PaginationItensPerPage = styled.div`
+  display: flex;
+  justify-content: right;
+  align-items: center;
+  gap: 16px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  flex-wrap: wrap;
+`;
+
+export const NavButton = styled.button`
+  background-color: #6c5ce7;
+  color: #fff;
+  padding: 10px 16px;
+  margin: 0 5px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #5a4bd8;
+  }
+`;
+
+export const PaginationButton = styled.button<{ disabled?: boolean }>`
+  padding: 8px 16px;
+  background-color: ${({ disabled }) => (disabled ? '#ccc' : '#0077ff')};
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
+  font-weight: 500;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: ${({ disabled }) =>
+      disabled ? '#ccc' : '#005fcc'};
+  }
+`;
+
+export const PaginationInfo = styled.div`
+  font-size: 14px;
+  color: #555;
 `;

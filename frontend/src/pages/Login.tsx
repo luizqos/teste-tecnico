@@ -12,17 +12,22 @@ import {
   Button,
   Footer,
   Link,
+  PasswordWrapper,
+  TogglePasswordButton,
 } from '../components/styles/Login.styles';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 export default function Login() {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-     await login(email, password);
+      await login(email, password);
     } catch (error) {
       console.error(error);
     }
@@ -51,13 +56,22 @@ export default function Login() {
 
             <FormGroup>
               <Label>Senha</Label>
-              <Input
-                type="password"
-                placeholder="********"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <PasswordWrapper>
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="********"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  style={{ paddingRight: '40px' }}
+                />
+                <TogglePasswordButton
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} />
+                </TogglePasswordButton>
+              </PasswordWrapper>
             </FormGroup>
 
             <Button type="submit">Entrar</Button>
@@ -69,7 +83,6 @@ export default function Login() {
         </Card>
       </LoginFormArea>
 
-      {/* <ImageArea /> */}
     </Wrapper>
   );
 }

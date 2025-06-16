@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThan } from 'typeorm';
+import { Repository, LessThan, Not } from 'typeorm';
 import { User } from './entities/user.entity';
 import { UserResponseDto } from './dto/user-response.dto';
 import * as bcrypt from 'bcrypt';
@@ -25,10 +25,18 @@ export class UsersService {
     password: string;
     role?: string;
   }) {
-    const hashedPassword = await this.hashPassword(data.password);
+    const existingUser = await this.findByEmail(data.email);
+    if (existingUser) {
+      throw new Error('Usuário já existe com este e-mail.');
+    }
+    if (!data.email || !data.name || !data.password) {
+      throw new Error('Todos os campos são obrigatórios.');
+    }
+    const password = await this.hashPassword(data.password);
     const user = this.usersRepository.create({
-      ...data,
-      password: hashedPassword,
+      email: data.email.toLowerCase(),
+      name: data.name.toUpperCase(),
+      password,
       role: data.role || 'user',
     });
     return this.usersRepository.save(user);
@@ -53,6 +61,7 @@ export class UsersService {
     }
 
     let where: Record<string, any> | Record<string, any>[] = user;
+    where = { email: Not('admin@admin.com'), ...where };
 
     if (daysWithoutLogin) {
       const days = parseInt(daysWithoutLogin, 10);
@@ -84,6 +93,14 @@ export class UsersService {
   }
 
   async update(id: number, dto: UpdateUserDto) {
+    dto.name = dto.name?.toUpperCase();
+    dto.email = dto.email?.toLowerCase();
+    if (dto.email) {
+      const existingUser = await this.findByEmail(dto.email);
+      if (existingUser && existingUser.id !== id) {
+        throw new Error('Já existe um usuário com este e-mail.');
+      }
+    }
     if (dto.password) {
       dto.password = await this.hashPassword(dto.password);
     }
@@ -92,7 +109,16 @@ export class UsersService {
   }
 
   async remove(id: number) {
-    return this.usersRepository.delete(id);
+    const user = await this.usersRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new Error('Usuário não encontrado.');
+    }
+    const updatedUser = { ...user, status: false };
+    await this.usersRepository.update(id, updatedUser);
+    if (user.id === 1) {
+      throw new Error('Não é possível excluir o usuário administrador master.');
+    }
+    return this.findById(id);
   }
 
   async create(dto: CreateUserDto) {

@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -8,6 +12,7 @@ import { User } from '../users/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserResponseDto } from 'src/users/dto/user-response.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
 export class AuthService {
@@ -21,6 +26,11 @@ export class AuthService {
 
   getJwtSecret() {
     return this.configService.get<string>('JWT_SECRET');
+  }
+
+  private async hashPassword(password: string): Promise<string> {
+    const saltOrRounds = 10;
+    return bcrypt.hash(password, saltOrRounds);
   }
 
   async validateUser(
@@ -53,6 +63,7 @@ export class AuthService {
       name: user.name,
       sub: user.id,
       role: user.role,
+      createdAt: user.createdAt,
     };
     return {
       access_token: this.jwtService.sign(payload),
@@ -60,14 +71,45 @@ export class AuthService {
   }
 
   async register(dto: RegisterDto) {
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const existingUser = await this.usersService.findByEmail(dto.email);
+    if (existingUser) {
+      throw new UnauthorizedException('Usuário já existe com este e-mail');
+    }
+    if (!dto.email || !dto.name || !dto.password) {
+      throw new UnauthorizedException('Dados inválidos para registro');
+    }
+    const password = await this.hashPassword(dto.password);
     const newUser = await this.usersService.create({
-      email: dto.email,
-      name: dto.name,
-      password: hashedPassword,
-      role: dto.role,
+      email: dto.email.toLowerCase(),
+      name: dto.name.toUpperCase(),
+      password,
+      role: 'user',
     });
-
+    if (!newUser) {
+      throw new UnauthorizedException('Erro ao registrar usuário');
+    }
     return this.login(newUser);
+  }
+
+  async updateProfile(id: number, userUpdated: UpdateProfileDto) {
+    const user = await this.usersRepository.findOne({ where: { id } });
+
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
+    if (userUpdated.name) {
+      user.name = userUpdated.name.toUpperCase();
+    }
+
+    if (userUpdated.password) {
+      user.password = await this.hashPassword(userUpdated.password);
+    }
+
+    await this.usersRepository.save(user);
+
+    return {
+      message: 'Perfil atualizado com sucesso',
+    };
   }
 }

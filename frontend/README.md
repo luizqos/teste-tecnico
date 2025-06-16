@@ -85,6 +85,7 @@ frontend/
 │   ├── contexts/
 │   ├── pages/
 │   ├── services/
+    ├── utils/
 │   ├── styles/
 │   └── App.tsx
 ├── .env

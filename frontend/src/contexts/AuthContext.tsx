@@ -3,12 +3,14 @@ import { createContext, useState, useContext, useEffect, type ReactNode } from '
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode";
 import api from '../services/api';
+import { toast } from 'react-toastify';
 
 interface User {
   id: number;
   name: string;
   email: string;
   role: string;
+  createdAt?: Date;
 }
 
 interface JwtPayload {
@@ -16,6 +18,7 @@ interface JwtPayload {
   email: string;
   name: string;
   role: string;
+  createdAt: Date;
   iat: number;
   exp: number;
 }
@@ -45,6 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         name: decoded.name,
         email: decoded.email,
         role: decoded.role,
+        createdAt: decoded.createdAt
       };
       setUser(currentUser);
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -62,6 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         name: decoded.name,
         email: decoded.email,
         role: decoded.role,
+        createdAt: decoded.createdAt
       };
       
       localStorage.setItem('token', token);
@@ -75,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (err) {
       console.error('Erro no login', err);
-      alert('Email ou senha inválidos');
+      toast.error('Email ou senha inválidos');
     }
   }
 

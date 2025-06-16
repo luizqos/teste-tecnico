@@ -30,8 +30,8 @@ Este projeto é uma API RESTful construída com **NestJS**, implementando funcio
 1. **Clone o projeto:**
 
 ```bash
-git clone https://github.com/luizqos/teste-tecnico.git
-cd teste-tecnico
+git clone https://github.com/luizqos/user-management.git
+cd user-management
 
 
 ## Crie o arquivo .env
