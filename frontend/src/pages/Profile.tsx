@@ -17,6 +17,7 @@ import {
   SectionTitle,
 } from '../components/styles/Profile.styles';
 import { formatDate } from '../utils/formatDate';
+import { toast } from 'react-toastify';
 
 export default function Profile() {
   const { user, logout } = useAuth();
@@ -39,11 +40,12 @@ export default function Profile() {
         name,
         password: password !== '' ? password : undefined,
       });
-      alert('Dados atualizados com sucesso!');
+      toast.success('Dados atualizados com sucesso!');
       setPassword('');
     } catch (err) {
       console.error(err);
-      alert('Erro ao atualizar dados.');
+      toast.error('Erro ao atualizar dados.');
+
     } finally {
       setLoading(false);
     }

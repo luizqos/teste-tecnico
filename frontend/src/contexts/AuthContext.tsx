@@ -3,6 +3,7 @@ import { createContext, useState, useContext, useEffect, type ReactNode } from '
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode";
 import api from '../services/api';
+import { toast } from 'react-toastify';
 
 interface User {
   id: number;
@@ -79,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (err) {
       console.error('Erro no login', err);
-      alert('Email ou senha inválidos');
+      toast.error('Email ou senha inválidos');
     }
   }
 

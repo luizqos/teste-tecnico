@@ -13,6 +13,7 @@ import {
   StyledInput,
   StyledButton,
 } from '../components/styles/Register.styles';
+import { toast } from 'react-toastify';
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -36,7 +37,7 @@ export default function Register() {
       navigate('/login');
     } catch (err) {
       console.error(err);
-      alert('Erro ao cadastrar.');
+      toast.error('Erro ao cadastrar.');
     }
   };
 

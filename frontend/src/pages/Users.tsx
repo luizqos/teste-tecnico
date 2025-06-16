@@ -37,6 +37,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPen, faTrash, faPlus, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { formatDate } from '../utils/formatDate';
+import { toast } from 'react-toastify';
 
 interface User {
   id: number;
@@ -68,7 +69,8 @@ export default function Users() {
       setUsers(data);
     } catch (err) {
       console.error(err);
-      alert('Erro ao buscar usuários');
+      toast.error('Erro ao buscar usuários');
+
     }
   };
 
@@ -85,7 +87,7 @@ export default function Users() {
       fetchUsers();
     } catch (err) {
       console.error(err);
-      alert('Erro ao excluir usuário');
+      toast.error('Erro ao excluir usuário');
     }
   };
 
@@ -123,7 +125,7 @@ export default function Users() {
     try {
       if (isNew) {
         if (!password) {
-          alert('Senha é obrigatória para novo usuário');
+          toast.error('Senha é obrigatória para novo usuário');
           return;
         }
         const payload = { ...rest, password };
@@ -136,7 +138,7 @@ export default function Users() {
       fetchUsers();
     } catch (err) {
       console.error(err);
-      alert('Erro ao salvar usuário');
+      toast.error('Erro ao salvar usuário');
     }
   };
 
