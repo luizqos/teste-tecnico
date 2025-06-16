@@ -71,7 +71,6 @@ describe('UsersController (e2e)', () => {
 
     expect(res.body).toHaveProperty('id');
     expect(res.body).toHaveProperty('email', 'created@example.com');
-    createdUserId = res.body.id;
   });
 
   it('PATCH /users/:id → should update own user data', async () => {
