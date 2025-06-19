@@ -40,6 +40,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPen, faTrash, faPlus, faEye, faHome, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { formatDate } from '../utils/formatDate';
 import { toast } from 'react-toastify';
+import SweetAlertConfirm from '../components/globals/alerts';
 
 interface User {
   id: number;
@@ -82,18 +83,21 @@ export default function Users() {
   }, []);
 
   const handleDelete = async (id: number) => {
-    const confirm = window.confirm('Deseja realmente excluir este usuário?');
-    if (!confirm) return;
+    const handleConfirmDelete = async () => {
+      try {
+        await api.delete(`/users/${id}`);
+        fetchUsers();
+      } catch (err) {
+        console.error(err);
+        toast.error('Erro ao excluir usuário');
+      }
+    };
 
-    try {
-      await api.delete(`/users/${id}`);
-      fetchUsers();
-    } catch (err) {
-      console.error(err);
-      toast.error('Erro ao excluir usuário');
-    }
+    await SweetAlertConfirm({
+      title: "Deseja realmente excluir este usuário?",
+      onConfirm: handleConfirmDelete,
+    });
   };
-
   const handleOpenEdit = (user: User) => {
     setEditUser({ ...user, password: '' });
     setIsNew(false);
